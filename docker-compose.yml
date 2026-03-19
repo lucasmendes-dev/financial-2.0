@@ -1,0 +1,71 @@
+services:
+    # image project
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        working_dir: /var/www/
+        volumes:
+            - ./:/var/www
+        depends_on:
+            - redis
+        networks:
+            - financial_network
+
+    # nginx
+    nginx:
+        image: nginx:alpine
+        restart: unless-stopped
+        ports:
+            - "8888:80"
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/:/etc/nginx/conf.d/
+        networks:
+            - financial_network
+
+    # db mysql
+    db:
+        image: mysql:8.0
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+        volumes:
+            - ./.docker/mysql/dbdata:/var/lib/mysql
+        ports:
+            - "3366:3306"
+        networks:
+            - financial_network
+
+    # PHPMyAdmin
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        restart: unless-stopped
+        ports:
+            - "8080:80"
+        environment:
+            PMA_HOST: db
+            PMA_PORT: 3306
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-userpass}
+        networks:
+            - financial_network
+
+    # redis
+    redis:
+        image: redis:latest
+        networks:
+            - financial_network
+    
+    # mailhog
+    mailhog:
+        image: mailhog/mailhog
+        ports:
+            - "8025:8025"
+        networks:
+            - financial_network
+
+networks:
+    financial_network:
+        driver: bridge

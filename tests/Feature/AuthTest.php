@@ -12,11 +12,11 @@ class AuthTest extends TestCase
 
     public function test_user_can_register()
     {
-        $response = $this->postJson('/api/auth/register', [
+        $response = $this->postJson('/api/v1/auth/register', [
             'name' => 'John Doe',
             'email' => 'john@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'P@ssword123',
+            'password_confirmation' => 'P@ssword123',
         ]);
 
         $response->assertStatus(201)
@@ -37,12 +37,12 @@ class AuthTest extends TestCase
     public function test_user_can_login()
     {
         $user = User::factory()->create([
-            'password' => bcrypt('password123'),
+            'password' => bcrypt('P@ssword123'),
         ]);
 
-        $response = $this->postJson('/api/auth/login', [
+        $response = $this->postJson('/api/v1/auth/login', [
             'email' => $user->email,
-            'password' => 'password123',
+            'password' => 'P@ssword123',
         ]);
 
         $response->assertStatus(200)
@@ -63,7 +63,7 @@ class AuthTest extends TestCase
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->postJson('/api/auth/logout');
+        ])->postJson('/api/v1/auth/logout');
 
         $response->assertStatus(200)
                  ->assertJson(['message' => 'Logged out successfully']);
@@ -78,7 +78,7 @@ class AuthTest extends TestCase
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->postJson('/api/auth/refresh');
+        ])->postJson('/api/v1/auth/refresh');
 
         $response->assertStatus(200)
                  ->assertJsonStructure([
@@ -100,7 +100,7 @@ class AuthTest extends TestCase
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->getJson('/api/auth/me');
+        ])->getJson('/api/v1/auth/me');
 
         $response->assertStatus(200)
                  ->assertJson([

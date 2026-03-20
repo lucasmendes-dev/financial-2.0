@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignUuid('asset_id')->constrained()->cascadeOnDelete();
 
             $table->integer('quantity');
-            $table->decimal('avg_price', 15, 6);
+            $table->decimal('avg_price', 15, 2);
             
             $table->timestamps();
 

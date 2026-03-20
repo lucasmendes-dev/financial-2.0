@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+#[Fillable(['user_id', 'asset_id', 'type', 'quantity', 'price_per_asset', 'total', 'executed_at'])]
+class Transaction extends Model
+{
+    /** @use HasFactory<\Database\Factories\TransactionFactory> */
+    use HasFactory;
+
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
+     * The "type" of the primary key ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+}

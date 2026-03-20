@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
@@ -13,29 +15,25 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request)
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $validated = $request->validated();
+        $data = $request->validated();
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
+        $user = User::create($data);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'User created successfully',
             'data' => [
-                'user' => $user,
+                'user' => new UserResource($user),
                 'access_token' => $token,
                 'token_type' => 'Bearer',
             ]
         ], Response::HTTP_CREATED);
     }
 
-    public function login(LoginRequest $request)
+    public function login(LoginRequest $request): JsonResponse
     {
         $validated = $request->validated();
 
@@ -52,14 +50,14 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Logged in successfully',
             'data' => [
-                'user' => $user,
+                'user' => new UserResource($user),
                 'access_token' => $token,
                 'token_type' => 'Bearer',
             ]
         ], Response::HTTP_OK);
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
 
@@ -68,7 +66,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function refresh(Request $request)
+    public function refresh(Request $request): JsonResponse
     {
         $user = $request->user();
         
@@ -79,19 +77,19 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Token refreshed successfully',
             'data' => [
-                'user' => $user,
+                'user' => new UserResource($user),
                 'new_token' => $newToken,
                 'token_type' => 'Bearer',
             ]
         ], Response::HTTP_OK);
     }
 
-    public function me(Request $request)
+    public function me(Request $request): JsonResponse
     {
         return response()->json([
             'message' => 'You are already logged in',
             'data' => [
-                'user' => $request->user()
+                'user' => new UserResource($request->user()),
             ]
         ], Response::HTTP_OK);
     }

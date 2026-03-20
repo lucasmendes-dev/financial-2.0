@@ -34,5 +34,8 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
+    'brapi' => [
+        'url' => env('BRAPI_URL'),
+        'token' => env('BRAPI_TOKEN'),
+    ],
 ];

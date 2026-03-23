@@ -3,65 +3,86 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Filters\V1\PositionFilter;
 use App\Http\Requests\StorePositionRequest;
 use App\Http\Requests\UpdatePositionRequest;
+use App\Http\Resources\PositionResource;
 use App\Models\Position;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class PositionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    use AuthorizesRequests;
+
+    public function index(Request $request, PositionFilter $filter): JsonResponse
     {
-        //
+        $this->authorize('viewAny', Position::class);
+
+        $positions = $filter->apply(
+            Position::query()->where('user_id', $request->user()->id)->with('asset:id,ticker')
+        )->paginate(20);
+
+        return response()->json([
+            'data' => PositionResource::collection($positions->appends($request->query())),
+            'meta' => [
+                'total' => $positions->total(),
+                'per_page' => $positions->perPage(),
+                'current_page' => $positions->currentPage(),
+                'last_page' => $positions->lastPage(),
+            ]
+        ], Response::HTTP_OK);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StorePositionRequest $request): JsonResponse
     {
-        //
+        $this->authorize('create', Position::class);
+        
+        $data = $request->validated();
+        $data['user_id'] = $request->user()->id;
+
+        $position = Position::create($data);
+
+        return response()->json([
+            'data' => new PositionResource($position),
+        ], Response::HTTP_CREATED);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StorePositionRequest $request)
+    public function show(Position $position): JsonResponse
     {
-        //
+        $this->authorize('view', $position);
+
+        return response()->json([
+            'data' => new PositionResource($position),
+        ], Response::HTTP_OK);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Position $position)
+    public function update(UpdatePositionRequest $request, Position $position): JsonResponse
     {
-        //
+        $this->authorize('update', $position);
+
+        $data = $request->validated();
+        $position->update($data);
+
+        return response()->json([
+            'message' => 'Updated successfully',
+            'data' => new PositionResource($position),
+        ], Response::HTTP_OK);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Position $position)
+    public function destroy(Position $position): JsonResponse
     {
-        //
-    }
+        $this->authorize('delete', $position);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdatePositionRequest $request, Position $position)
-    {
-        //
-    }
+        $position->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Position $position)
-    {
-        //
+        return response()->json(
+            [
+                'message' => 'Deleted successfully'
+            ],
+            Response::HTTP_OK
+        );
     }
 }

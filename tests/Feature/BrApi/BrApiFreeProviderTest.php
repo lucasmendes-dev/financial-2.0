@@ -4,8 +4,8 @@ namespace Tests\Feature\BrApi;
 
 use App\Integrations\BrApiFreeProvider;
 use App\DTO\BrApiFreeDTO;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class BrApiFreeProviderTest extends TestCase

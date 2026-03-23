@@ -3,65 +3,81 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Filters\V1\AssetFilter;
 use App\Http\Requests\StoreAssetRequest;
 use App\Http\Requests\UpdateAssetRequest;
+use App\Http\Resources\AssetResource;
 use App\Models\Asset;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class AssetController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    use AuthorizesRequests;
+
+    public function index(Request $request, AssetFilter $filter): JsonResponse
     {
-        //
+        $this->authorize('viewAny', Asset::class);
+
+        $assets = $filter->apply(Asset::query())->paginate(20);
+
+        return response()->json([
+            'data' => AssetResource::collection($assets->appends($request->query())),
+            'meta' => [
+                'total' => $assets->total(),
+                'per_page' => $assets->perPage(),
+                'current_page' => $assets->currentPage(),
+                'last_page' => $assets->lastPage(),
+            ]
+        ], Response::HTTP_OK);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreAssetRequest $request): JsonResponse
     {
-        //
+        $this->authorize('create', Asset::class);
+        
+        $asset = $request->validated();
+
+        return response()->json([
+            'data' => new AssetResource(Asset::create($asset)),
+        ], Response::HTTP_CREATED);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreAssetRequest $request)
+    public function show(Asset $asset): JsonResponse
     {
-        //
+        $this->authorize('view', $asset);
+
+        return response()->json([
+            'data' => new AssetResource($asset),
+        ], Response::HTTP_OK);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Asset $asset)
+    public function update(UpdateAssetRequest $request, Asset $asset): JsonResponse
     {
-        //
+        $this->authorize('update', $asset);
+
+        $data = $request->validated();
+        $asset->update($data);
+
+        return response()->json([
+            'message' => 'Updated successfully',
+            'data' => new AssetResource($asset),
+        ], Response::HTTP_OK);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Asset $asset)
+    public function destroy(Asset $asset): JsonResponse
     {
-        //
-    }
+        $this->authorize('delete', $asset);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateAssetRequest $request, Asset $asset)
-    {
-        //
-    }
+        $asset->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Asset $asset)
-    {
-        //
+        return response()->json(
+            [
+                'message' => 'Deleted successfully'
+            ],
+            Response::HTTP_OK
+        );
     }
 }

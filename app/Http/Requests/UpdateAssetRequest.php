@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Asset;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateAssetRequest extends FormRequest
 {
@@ -12,7 +14,7 @@ class UpdateAssetRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,8 +24,13 @@ class UpdateAssetRequest extends FormRequest
      */
     public function rules(): array
     {
+        $asset = $this->route('asset');
+        $id = $asset instanceof Asset ? $asset->id : $asset;
+
         return [
-            //
+            'ticker' => ['sometimes', 'required', 'string', Rule::unique('assets', 'ticker')->ignore($id)],
+            'name' => ['sometimes', 'required', 'string'],
+            'type' => ['sometimes', 'required', Rule::in(['stock', 'fii'])],
         ];
     }
 }

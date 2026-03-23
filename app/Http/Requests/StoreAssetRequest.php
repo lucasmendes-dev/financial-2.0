@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreAssetRequest extends FormRequest
 {
@@ -12,7 +13,7 @@ class StoreAssetRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +24,9 @@ class StoreAssetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'ticker' => ['required', 'string', 'unique:assets,ticker'],
+            'name' => ['required', 'string'],
+            'type' => ['required', Rule::in(['stock', 'fii'])],
         ];
     }
 }

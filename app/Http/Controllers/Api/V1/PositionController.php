@@ -8,6 +8,7 @@ use App\Http\Requests\StorePositionRequest;
 use App\Http\Requests\UpdatePositionRequest;
 use App\Http\Resources\PositionResource;
 use App\Models\Position;
+use App\Services\PositionService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,8 @@ use Symfony\Component\HttpFoundation\Response;
 class PositionController extends Controller
 {
     use AuthorizesRequests;
+
+    public function __construct(private PositionService $service) {}
 
     public function index(Request $request, PositionFilter $filter): JsonResponse
     {
@@ -36,38 +39,11 @@ class PositionController extends Controller
         ], Response::HTTP_OK);
     }
 
-    public function store(StorePositionRequest $request): JsonResponse
-    {
-        $this->authorize('create', Position::class);
-        
-        $data = $request->validated();
-        $data['user_id'] = $request->user()->id;
-
-        $position = Position::create($data);
-
-        return response()->json([
-            'data' => new PositionResource($position),
-        ], Response::HTTP_CREATED);
-    }
-
     public function show(Position $position): JsonResponse
     {
         $this->authorize('view', $position);
 
         return response()->json([
-            'data' => new PositionResource($position),
-        ], Response::HTTP_OK);
-    }
-
-    public function update(UpdatePositionRequest $request, Position $position): JsonResponse
-    {
-        $this->authorize('update', $position);
-
-        $data = $request->validated();
-        $position->update($data);
-
-        return response()->json([
-            'message' => 'Updated successfully',
             'data' => new PositionResource($position),
         ], Response::HTTP_OK);
     }

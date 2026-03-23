@@ -20,6 +20,7 @@ class BrApiFreeProviderTest extends TestCase
             'results' => [
                 [
                     'symbol' => 'PETR4',
+                    'longName' => 'Petroleo Brasileiro SA Pfd',
                     'regularMarketPrice' => 30.50,
                     'regularMarketChange' => 0.50,
                     'regularMarketChangePercent' => 1.67,

@@ -25,6 +25,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/assets/{asset}', [AssetController::class, 'show']);
 
         // positions
-        Route::apiResource('positions', PositionController::class);
+        Route::get('/positions', [PositionController::class, 'index']);
+        Route::get('/positions/{position}', [PositionController::class, 'show']);
+        Route::delete('/positions/{position}', [PositionController::class, 'destroy']);
     });
 });

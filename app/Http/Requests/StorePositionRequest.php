@@ -23,7 +23,7 @@ class StorePositionRequest extends FormRequest
     {
         return [
             'asset_id' => ['nullable', 'string', 'exists:assets,id'],
-            'asset_ticker' => ['required', 'string', 'exists:assets,ticker'],
+            'asset_ticker' => ['required', 'string'],
             'quantity' => ['required', 'numeric', 'min:0.01'],
             'avg_price' => ['required', 'numeric', 'min:0.01'],
         ];

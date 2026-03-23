@@ -4,8 +4,8 @@ namespace Tests\Feature\BrApi;
 
 use App\Integrations\BrApiFreeProvider;
 use App\DTO\BrApiFreeDTO;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class BrApiFreeProviderTest extends TestCase
@@ -20,6 +20,7 @@ class BrApiFreeProviderTest extends TestCase
             'results' => [
                 [
                     'symbol' => 'PETR4',
+                    'longName' => 'Petroleo Brasileiro SA Pfd',
                     'regularMarketPrice' => 30.50,
                     'regularMarketChange' => 0.50,
                     'regularMarketChangePercent' => 1.67,

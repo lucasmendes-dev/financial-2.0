@@ -5,6 +5,7 @@ namespace Tests\Feature\Api\V1;
 use App\Models\Asset;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class AssetTest extends TestCase
@@ -26,7 +27,7 @@ class AssetTest extends TestCase
         $response = $this->actingAs($this->user)
             ->getJson('/api/v1/assets');
 
-        $response->assertStatus(200)
+        $response->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure([
                 'data' => [
                     '*' => ['ticker', 'name', 'type']
@@ -43,7 +44,7 @@ class AssetTest extends TestCase
         $response = $this->actingAs($this->user)
             ->getJson("/api/v1/assets/{$asset->id}");
 
-        $response->assertStatus(200)
+        $response->assertStatus(Response::HTTP_OK)
             ->assertJson([
                 'data' => [
                     'ticker' => $asset->ticker,
@@ -56,6 +57,6 @@ class AssetTest extends TestCase
     public function test_unauthenticated_user_cannot_access_assets()
     {
         $response = $this->getJson('/api/v1/assets');
-        $response->assertStatus(401);
+        $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 }

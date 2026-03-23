@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\V1\Auth\AuthController;    
 use App\Http\Controllers\Api\V1\AssetController;
+use App\Http\Controllers\Api\V1\PositionController;
 
 Route::prefix('v1')->group(function () {
     // auth
@@ -18,9 +19,14 @@ Route::prefix('v1')->group(function () {
         });
     });
 
-    // assets
     Route::middleware('auth:sanctum')->group(function () {
+        // assets
         Route::get('/assets', [AssetController::class, 'index']);
         Route::get('/assets/{asset}', [AssetController::class, 'show']);
+
+        // positions
+        Route::get('/positions', [PositionController::class, 'index']);
+        Route::get('/positions/{position}', [PositionController::class, 'show']);
+        Route::delete('/positions/{position}', [PositionController::class, 'destroy']);
     });
 });

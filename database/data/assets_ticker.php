@@ -1,5 +1,6 @@
 <?php
 
+// sample with valid B3 tickers to seed database with real data
 return [
     'PETR4', 'PETR3', 'VALE3', 'ITUB4', 'BBDC4', 'BBDC3', 'ABEV3', 'BBAS3', 'ITSA4', 'SANB11',
     'JBSS3', 'RENT3', 'WEGE3', 'SUZB3', 'BPAC11', 'EQTL3', 'RDOR3', 'GGBR4', 'RAIL3', 'VIVT3',

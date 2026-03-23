@@ -8,6 +8,7 @@ class BrApiFreeDTO implements MarketDataDTOInterface
 {
     public function __construct(
         public readonly string $symbol,
+        public readonly string $long_name,
         public readonly float $regular_market_price,
         public readonly float $regular_market_change,
         public readonly float $regular_market_change_percent,
@@ -21,6 +22,7 @@ class BrApiFreeDTO implements MarketDataDTOInterface
 
         return new self(
             symbol: $result['symbol'],
+            long_name: $result['longName'],
             regular_market_price: (float) $result['regularMarketPrice'],
             regular_market_change: (float) $result['regularMarketChange'],
             regular_market_change_percent: (float) $result['regularMarketChangePercent'],
@@ -33,6 +35,7 @@ class BrApiFreeDTO implements MarketDataDTOInterface
     {
         return [
             'symbol' => $this->symbol,
+            'long_name' => $this->long_name,
             'regular_market_price' => $this->regular_market_price,
             'regular_market_change' => $this->regular_market_change,
             'regular_market_change_percent' => $this->regular_market_change_percent,

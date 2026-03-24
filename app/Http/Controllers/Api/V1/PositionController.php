@@ -4,11 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Filters\V1\PositionFilter;
-use App\Http\Requests\StorePositionRequest;
-use App\Http\Requests\UpdatePositionRequest;
 use App\Http\Resources\PositionResource;
 use App\Models\Position;
-use App\Services\PositionService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,8 +14,6 @@ use Symfony\Component\HttpFoundation\Response;
 class PositionController extends Controller
 {
     use AuthorizesRequests;
-
-    public function __construct(private PositionService $service) {}
 
     public function index(Request $request, PositionFilter $filter): JsonResponse
     {

@@ -3,18 +3,16 @@
 namespace App\Services;
 
 use App\Interfaces\MarketDataDTOInterface;
-use App\Interfaces\MarketDataProviderInterface;
+use App\Interfaces\MarketDataAdapterInterface;
 
 class MarketDataService
 {
-    public function getMarketData(string $ticker, MarketDataProviderInterface $marketDataProvider): ?MarketDataDTOInterface
+    public function __construct(
+        private MarketDataAdapterInterface $marketDataAdapter
+    ) {}
+
+    public function getMarketData(string $ticker): MarketDataDTOInterface
     {
-        $data = $marketDataProvider->fetchData($ticker);
-
-        if ($data === null) {
-            return null;
-        }
-
-        return $data;
+        return $this->marketDataAdapter->fetchData($ticker);
     }
 }

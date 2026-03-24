@@ -3,10 +3,10 @@
 namespace App\Integrations;
 
 use App\DTO\BrApiFreeDTO;
-use App\Interfaces\MarketDataProviderInterface;
+use App\Interfaces\MarketDataAdapterInterface;
 use Illuminate\Support\Facades\Http;
 
-class BrApiFreeProvider implements MarketDataProviderInterface
+class BrApiFreeAdapter implements MarketDataAdapterInterface
 {
     private string $apiUrl;
     private array $params;
@@ -17,12 +17,12 @@ class BrApiFreeProvider implements MarketDataProviderInterface
         $this->params['token'] = config('services.brapi.token');
     }
 
-    public function fetchData(string $ticker): ?BrApiFreeDTO
+    public function fetchData(string $ticker): BrApiFreeDTO
     {
         $response = Http::get($this->apiUrl . $ticker, $this->params);
 
         if ($response->failed()) {
-            return null;
+            throw new \Exception('Failed to fetch data from BrApi');
         }
 
         return BrApiFreeDTO::fromArray($response->json());

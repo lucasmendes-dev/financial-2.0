@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\BrApi;
 
-use App\Integrations\BrApiFreeProvider;
+use App\Integrations\BrApiFreeAdapter;
 use App\DTO\BrApiFreeDTO;
 use Illuminate\Support\Facades\Http;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
-class BrApiFreeProviderTest extends TestCase
+class BrApiFreeAdapterTest extends TestCase
 {
     public function test_it_returns_dto_on_successful_api_response()
     {
@@ -34,8 +34,8 @@ class BrApiFreeProviderTest extends TestCase
             'https://brapi.dev/api/quote/PETR4*' => Http::response($mockResponse, Response::HTTP_OK)
         ]);
 
-        $provider = new BrApiFreeProvider();
-        $result = $provider->fetchData($ticker);
+        $adapter = new BrApiFreeAdapter();
+        $result = $adapter->fetchData($ticker);
 
         $this->assertInstanceOf(BrApiFreeDTO::class, $result);
         $this->assertEquals('PETR4', $result->symbol);
@@ -46,7 +46,7 @@ class BrApiFreeProviderTest extends TestCase
         $this->assertEquals('2023-10-27T10:00:00Z', $result->requested_at);
     }
 
-    public function test_it_returns_null_on_api_failure()
+    public function test_it_throws_exception_on_api_failure()
     {
         config(['services.brapi.url' => 'https://brapi.dev/api/quote/']);
 
@@ -54,13 +54,14 @@ class BrApiFreeProviderTest extends TestCase
             'https://brapi.dev/api/quote/*' => Http::response(['message' => 'Error'], Response::HTTP_INTERNAL_SERVER_ERROR)
         ]);
 
-        $provider = new BrApiFreeProvider();
-        $result = $provider->fetchData('INVALID');
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Failed to fetch data from BrApi');
 
-        $this->assertNull($result);
+        $adapter = new BrApiFreeAdapter();
+        $adapter->fetchData('INVALID');
     }
 
-    public function test_it_returns_null_on_unauthorized_response()
+    public function test_it_throws_exception_on_unauthorized_response()
     {
         config(['services.brapi.url' => 'https://brapi.dev/api/quote/']);
 
@@ -68,9 +69,10 @@ class BrApiFreeProviderTest extends TestCase
             'https://brapi.dev/api/quote/*' => Http::response(['message' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED)
         ]);
 
-        $provider = new BrApiFreeProvider();
-        $result = $provider->fetchData('PETR4');
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Failed to fetch data from BrApi');
 
-        $this->assertNull($result);
+        $adapter = new BrApiFreeAdapter();
+        $adapter->fetchData('PETR4');
     }
 }

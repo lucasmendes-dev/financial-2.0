@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Interfaces\MarketDataDTOInterface;
-use App\Interfaces\MarketDataProviderInterface;
+use App\Interfaces\MarketDataAdapterInterface;
 use App\Models\Asset;
 use Illuminate\Support\Facades\Http;
 
@@ -11,13 +11,23 @@ class AssetService
 {
     public function __construct(
         private MarketDataService $marketDataService,
-        private MarketDataProviderInterface $marketDataProvider
+        private MarketDataAdapterInterface $marketDataAdapter
     ) {}
+
+    public function getAssetID(string $ticker): string
+    {
+        $asset = Asset::where('ticker', $ticker)->exists();
+        if (!$asset) {
+            return $this->addNewAsset($ticker)->id;
+        }
+
+        return $asset->id;
+    }
 
     public function addNewAsset(string $ticker): Asset
     {
         if ($this->isTickerValid($ticker)) {
-            $assetData = $this->marketDataService->getMarketData($ticker, $this->marketDataProvider);
+            $assetData = $this->marketDataService->getMarketData($ticker, $this->marketDataAdapter);
 
             return Asset::create([
                 'ticker' => $ticker,

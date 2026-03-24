@@ -112,4 +112,70 @@ class PositionTest extends TestCase
         $response = $this->getJson('/api/v1/positions');
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
+
+    public function test_can_filter_positions_by_quantity_range()
+    {
+        $asset1 = Asset::factory()->create();
+        $asset2 = Asset::factory()->create();
+        $asset3 = Asset::factory()->create();
+
+        Position::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset1->id, 'quantity' => 10]);
+        Position::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset2->id, 'quantity' => 60]);
+        Position::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset3->id, 'quantity' => 1100]);
+
+        // Filter quantity > 50
+        $response = $this->actingAs($this->user)
+            ->getJson('/api/v1/positions?quantity_gt=50');
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertJsonCount(2, 'data');
+
+        // Filter quantity < 1000
+        $response = $this->actingAs($this->user)
+            ->getJson('/api/v1/positions?quantity_lt=1000');
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertJsonCount(2, 'data');
+
+        // Filter 50 < quantity < 1000
+        $response = $this->actingAs($this->user)
+            ->getJson('/api/v1/positions?quantity_gt=50&quantity_lt=1000');
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.quantity', 60);
+    }
+
+    public function test_can_filter_positions_by_avg_price_range()
+    {
+        $asset1 = Asset::factory()->create();
+        $asset2 = Asset::factory()->create();
+        $asset3 = Asset::factory()->create();
+
+        Position::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset1->id, 'avg_price' => 5]);
+        Position::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset2->id, 'avg_price' => 15]);
+        Position::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset3->id, 'avg_price' => 25]);
+
+        // Filter avg_price > 10
+        $response = $this->actingAs($this->user)
+            ->getJson('/api/v1/positions?avg_price_gt=10');
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertJsonCount(2, 'data');
+
+        // Filter avg_price < 20
+        $response = $this->actingAs($this->user)
+            ->getJson('/api/v1/positions?avg_price_lt=20');
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertJsonCount(2, 'data');
+
+        // Filter 10 < avg_price < 20
+        $response = $this->actingAs($this->user)
+            ->getJson('/api/v1/positions?avg_price_gt=10&avg_price_lt=20');
+
+        $response->assertStatus(Response::HTTP_OK)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.avg_price', 15);
+    }
 }

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Auth\AuthController;    
 use App\Http\Controllers\Api\V1\AssetController;
 use App\Http\Controllers\Api\V1\PositionController;
+use App\Http\Controllers\Api\V1\TransactionController;
 
 Route::prefix('v1')->group(function () {
     // auth
@@ -28,5 +29,12 @@ Route::prefix('v1')->group(function () {
         Route::get('/positions', [PositionController::class, 'index']);
         Route::get('/positions/{position}', [PositionController::class, 'show']);
         Route::delete('/positions/{position}', [PositionController::class, 'destroy']);
+
+        // transactions
+        Route::get('/transactions', [TransactionController::class, 'index']);
+        Route::post('/transactions', [TransactionController::class, 'store']);
+        Route::get('/transactions/{transaction}', [TransactionController::class, 'show']);
+        Route::put('/transactions/{transaction}', [TransactionController::class, 'update']);
+        Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy']);
     });
 });

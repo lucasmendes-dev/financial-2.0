@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 class BrApiFreeAdapter implements MarketDataAdapterInterface
 {
+    private string $availableTickersUrl = "https://brapi.dev/api/available";
     private string $apiUrl;
     private array $params;
 
@@ -26,5 +27,12 @@ class BrApiFreeAdapter implements MarketDataAdapterInterface
         }
 
         return BrApiFreeDTO::fromArray($response->json());
+    }
+
+    public function isTickerValid(string $ticker): bool
+    {
+        $response = Http::get($this->availableTickersUrl)->json();
+
+        return in_array($ticker, $response['stocks']);
     }
 }

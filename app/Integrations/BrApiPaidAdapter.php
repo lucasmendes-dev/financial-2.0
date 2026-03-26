@@ -12,4 +12,9 @@ class BrApiPaidAdapter implements MarketDataAdapterInterface
         // Will Be implemented if acquire the paid plan from 'https://brapi.dev/pricing'
         throw new \Exception('Not implemented');
     }
+
+    public function isTickerValid(string $ticker): bool
+    {
+        throw new \Exception('Not implemented');
+    }
 }

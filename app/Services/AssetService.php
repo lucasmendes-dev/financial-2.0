@@ -16,7 +16,7 @@ class AssetService
 
     public function getAssetID(string $ticker): string
     {
-        $asset = Asset::where('ticker', $ticker)->exists();
+        $asset = Asset::where('ticker', $ticker)->first();
         if (!$asset) {
             return $this->addNewAsset($ticker)->id;
         }
@@ -26,7 +26,7 @@ class AssetService
 
     public function addNewAsset(string $ticker): Asset
     {
-        if ($this->isTickerValid($ticker)) {
+        if ($this->marketDataAdapter->isTickerValid($ticker)) {
             $assetData = $this->marketDataService->getMarketData($ticker, $this->marketDataAdapter);
 
             return Asset::create([
@@ -34,22 +34,10 @@ class AssetService
                 'name' => $assetData->long_name,
                 'type' => $this->detectAssetType($assetData),
             ]);
+            // implement code to also add to market_data table at this point since it already does a request?
         }
 
         throw new \Exception("Ticker '{$ticker}' is not valid");
-    }
-
-    private function isTickerValid(string $ticker): bool
-    {
-        // calls brApi to check if ticker is valid
-        $url = "https://brapi.dev/api/available";
-        $response = Http::get($url)->json();
-
-        if (in_array($ticker, $response['stocks'])) {
-            return true;
-        }
-
-        return false;
     }
 
     private function detectAssetType(MarketDataDTOInterface $data): string

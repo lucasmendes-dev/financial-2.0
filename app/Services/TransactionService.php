@@ -23,7 +23,7 @@ class TransactionService
     private function getTransactionData(array $data): array
     {
         $data['user_id'] = Auth::user()->id;
-        $data['asset_id'] = $this->assetService->getAssetID($data['ticker']);
+        $data['asset_id'] = $this->assetService->getOrCreateAssetID($data['ticker']);
         $data['total'] = $data['quantity'] * $data['price_per_asset'];
         $data['executed_at'] = date('Y-m-d H:i:s', strtotime(now()));
 

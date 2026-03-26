@@ -14,7 +14,7 @@ class AssetService
         private MarketDataAdapterInterface $marketDataAdapter
     ) {}
 
-    public function getAssetID(string $ticker): string
+    public function getOrCreateAssetID(string $ticker): string
     {
         $asset = Asset::where('ticker', $ticker)->first();
         if (!$asset) {

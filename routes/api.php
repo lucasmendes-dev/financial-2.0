@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\AssetController;
 use App\Http\Controllers\Api\V1\PositionController;
 use App\Http\Controllers\Api\V1\TransactionController;
+use App\Http\Controllers\Api\V1\MarketDataController;
 
 Route::prefix('v1')->group(function () {
     // auth
@@ -36,5 +37,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/transactions/{transaction}', [TransactionController::class, 'show']);
         Route::put('/transactions/{transaction}', [TransactionController::class, 'update']);
         Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy']);
+
+        // market data
+        Route::post('/update-market-data', [MarketDataController::class, 'updateMarketData']);
     });
 });

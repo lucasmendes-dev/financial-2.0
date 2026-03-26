@@ -67,9 +67,10 @@ class TransactionController extends Controller
     {
         $this->authorize('update', $transaction);
 
-        $transaction->update($request->validated());
+        $transaction = $this->transactionService->handleTransactionUpdate($transaction, $request->validated());
 
         return response()->json([
+            'message' => 'Transaction updated successfully',
             'data' => new TransactionResource($transaction),
         ], Response::HTTP_OK);
     }
@@ -78,7 +79,7 @@ class TransactionController extends Controller
     {
         $this->authorize('delete', $transaction);
 
-        $transaction->delete();
+        $this->transactionService->handleTransactionDeletion($transaction);
 
         return response()->json([
             'message' => 'Deleted successfully'

@@ -131,7 +131,7 @@ class TransactionTest extends TestCase
 
         $updateData = [
             'quantity' => 20.0,
-            'total' => 3000.0,
+            'price_per_asset' => 100.0,
         ];
 
         $response = $this->actingAs($this->user)
@@ -140,15 +140,15 @@ class TransactionTest extends TestCase
         $response->assertStatus(Response::HTTP_OK)
             ->assertJson([
                 'data' => [
-                    'quantity' => 20.0,
-                    'total' => 3000.0,
+                    'quantity' => 20,
+                    'total' => 2000.0,
                 ]
             ]);
 
         $this->assertDatabaseHas('transactions', [
             'id' => $transaction->id,
             'quantity' => 20.0,
-            'total' => 3000.0,
+            'total' => 2000.0,
         ]);
     }
 
@@ -232,5 +232,271 @@ class TransactionTest extends TestCase
         $response->assertStatus(Response::HTTP_OK)
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment(['executed_at' => '2023-06-01 10:00:00']);
+    }
+
+    // =========================================================================
+    // Transaction → Position integration tests
+    // =========================================================================
+
+    public function test_buy_creates_position_when_none_exists()
+    {
+        $asset = Asset::factory()->create();
+
+        $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'buy',
+                'quantity' => 10,
+                'price_per_asset' => 30.0,
+            ]);
+
+        $this->assertDatabaseHas('positions', [
+            'user_id' => $this->user->id,
+            'asset_id' => $asset->id,
+            'quantity' => 10,
+            'avg_price' => 30.0,
+        ]);
+    }
+
+    public function test_buy_updates_existing_position_quantity_and_avg_price()
+    {
+        $asset = Asset::factory()->create();
+
+        // First buy: 10 @ 30
+        $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'buy',
+                'quantity' => 10,
+                'price_per_asset' => 30.0,
+            ]);
+
+        // Second buy: 10 @ 30.50
+        $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'buy',
+                'quantity' => 10,
+                'price_per_asset' => 30.50,
+            ]);
+
+        // Expected: qty=20, avg=(300+305)/20=30.25
+        $this->assertDatabaseHas('positions', [
+            'user_id' => $this->user->id,
+            'asset_id' => $asset->id,
+            'quantity' => 20,
+            'avg_price' => 30.25,
+        ]);
+    }
+
+    public function test_sell_decreases_position_quantity_and_keeps_avg_price()
+    {
+        $asset = Asset::factory()->create();
+
+        // Buy 10 @ 50
+        $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'buy',
+                'quantity' => 10,
+                'price_per_asset' => 50.0,
+            ]);
+
+        // Sell 4 @ 60
+        $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'sell',
+                'quantity' => 4,
+                'price_per_asset' => 60.0,
+            ]);
+
+        $this->assertDatabaseHas('positions', [
+            'user_id' => $this->user->id,
+            'asset_id' => $asset->id,
+            'quantity' => 6,
+            'avg_price' => 50.0,
+        ]);
+    }
+
+    public function test_sell_all_removes_position()
+    {
+        $asset = Asset::factory()->create();
+
+        // Buy 10 @ 50
+        $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'buy',
+                'quantity' => 10,
+                'price_per_asset' => 50.0,
+            ]);
+
+        // Sell all 10
+        $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'sell',
+                'quantity' => 10,
+                'price_per_asset' => 60.0,
+            ]);
+
+        $this->assertDatabaseMissing('positions', [
+            'user_id' => $this->user->id,
+            'asset_id' => $asset->id,
+        ]);
+    }
+
+    public function test_update_transaction_adjusts_position_correctly()
+    {
+        $asset = Asset::factory()->create();
+
+        // Initial buy: 10 @ 30 → position: qty=10, avg=30
+        $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'buy',
+                'quantity' => 10,
+                'price_per_asset' => 30.0,
+            ]);
+
+        // Second buy: 10 @ 30.50 → position: qty=20, avg=30.25
+        $response = $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'buy',
+                'quantity' => 10,
+                'price_per_asset' => 30.50,
+            ]);
+
+        $transactionId = $response->json('data.id');
+
+        $this->assertDatabaseHas('positions', [
+            'user_id' => $this->user->id,
+            'asset_id' => $asset->id,
+            'quantity' => 20,
+            'avg_price' => 30.25,
+        ]);
+
+        // Fix: second buy was actually 10 @ 31.00
+        $this->actingAs($this->user)
+            ->putJson("/api/v1/transactions/{$transactionId}", [
+                'price_per_asset' => 31.0,
+            ]);
+
+        // Expected: qty=20, avg=(300+310)/20=30.50
+        $this->assertDatabaseHas('positions', [
+            'user_id' => $this->user->id,
+            'asset_id' => $asset->id,
+            'quantity' => 20,
+            'avg_price' => 30.50,
+        ]);
+    }
+
+    public function test_update_transaction_type_from_buy_to_sell_adjusts_position()
+    {
+        $asset = Asset::factory()->create();
+
+        // Buy 10 @ 50 → position: qty=10, avg=50
+        $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'buy',
+                'quantity' => 10,
+                'price_per_asset' => 50.0,
+            ]);
+
+        // Buy 5 @ 60 → position: qty=15, avg=53.33
+        $response = $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'buy',
+                'quantity' => 5,
+                'price_per_asset' => 60.0,
+            ]);
+
+        $transactionId = $response->json('data.id');
+
+        // Fix: it was actually a sell of 5 @ 60
+        $this->actingAs($this->user)
+            ->putJson("/api/v1/transactions/{$transactionId}", [
+                'type' => 'sell',
+            ]);
+
+        // After edit: buy 10@50 + sell 5 → qty=5, avg=50
+        $this->assertDatabaseHas('positions', [
+            'user_id' => $this->user->id,
+            'asset_id' => $asset->id,
+            'quantity' => 5,
+            'avg_price' => 50.0,
+        ]);
+    }
+
+    public function test_delete_transaction_adjusts_position()
+    {
+        $asset = Asset::factory()->create();
+
+        // Buy 10 @ 30
+        $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'buy',
+                'quantity' => 10,
+                'price_per_asset' => 30.0,
+            ]);
+
+        // Buy 10 @ 50
+        $response = $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'buy',
+                'quantity' => 10,
+                'price_per_asset' => 50.0,
+            ]);
+
+        $transactionId = $response->json('data.id');
+
+        // Position: qty=20, avg=(300+500)/20=40
+        $this->assertDatabaseHas('positions', [
+            'user_id' => $this->user->id,
+            'asset_id' => $asset->id,
+            'quantity' => 20,
+            'avg_price' => 40.0,
+        ]);
+
+        // Delete second buy → recalculate from remaining
+        $this->actingAs($this->user)
+            ->deleteJson("/api/v1/transactions/{$transactionId}");
+
+        // Only first buy remains: qty=10, avg=30
+        $this->assertDatabaseHas('positions', [
+            'user_id' => $this->user->id,
+            'asset_id' => $asset->id,
+            'quantity' => 10,
+            'avg_price' => 30.0,
+        ]);
+    }
+
+    public function test_delete_only_transaction_removes_position()
+    {
+        $asset = Asset::factory()->create();
+
+        $response = $this->actingAs($this->user)
+            ->postJson('/api/v1/transactions', [
+                'ticker' => $asset->ticker,
+                'type' => 'buy',
+                'quantity' => 10,
+                'price_per_asset' => 30.0,
+            ]);
+
+        $transactionId = $response->json('data.id');
+
+        $this->actingAs($this->user)
+            ->deleteJson("/api/v1/transactions/{$transactionId}");
+
+        $this->assertDatabaseMissing('positions', [
+            'user_id' => $this->user->id,
+            'asset_id' => $asset->id,
+        ]);
     }
 }

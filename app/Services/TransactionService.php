@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
 
 class TransactionService
@@ -29,5 +30,30 @@ class TransactionService
         unset($data['ticker']);
 
         return $data;
+    }
+
+    public function handleTransactionUpdate(Transaction $transaction, array $data): Transaction
+    {
+        $transaction->fill($data);
+
+        if ($transaction->isDirty('quantity') || $transaction->isDirty('price_per_asset')) {
+            $transaction->total = $transaction->quantity * $transaction->price_per_asset;
+        }
+
+        $transaction->save();
+
+        $this->positionService->recalculatePosition($transaction->user_id, $transaction->asset_id);
+
+        return $transaction;
+    }
+
+    public function handleTransactionDeletion(Transaction $transaction): void
+    {
+        $userId = $transaction->user_id;
+        $assetId = $transaction->asset_id;
+
+        $transaction->delete();
+
+        $this->positionService->recalculatePosition($userId, $assetId);
     }
 }

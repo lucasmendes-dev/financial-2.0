@@ -25,6 +25,8 @@ return new class extends Migration
 
             $table->index('fetched_at');
             $table->index(['asset_id', 'fetched_at']);
+
+            $table->unique('asset_id');
         });
     }
 

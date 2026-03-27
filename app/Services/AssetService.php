@@ -5,8 +5,6 @@ namespace App\Services;
 use App\Interfaces\MarketDataDTOInterface;
 use App\Interfaces\MarketDataAdapterInterface;
 use App\Models\Asset;
-use App\Models\MarketData;
-use Illuminate\Support\Facades\Http;
 
 class AssetService
 {
@@ -36,7 +34,7 @@ class AssetService
                 'type' => $this->detectAssetType($assetData),
             ]);
             // since did a request already, save the 'updated' market data to db to avoid future requests
-            $this->marketDataService->saveApiDataToDB($asset->id, $assetData);
+            $this->marketDataService->saveData($asset->id, $assetData);
             return $asset;
         }
         throw new \Exception("Ticker '{$ticker}' is not valid");

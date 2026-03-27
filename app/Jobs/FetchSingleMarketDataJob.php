@@ -30,7 +30,7 @@ class FetchSingleMarketDataJob implements ShouldQueue
             }
 
             $data = $marketDataService->getMarketData($this->ticker);
-            $marketDataService->saveApiDataToDB($asset->id, $data);
+            $marketDataService->saveData($asset->id, $data);
         } catch (Exception $e) {
             Log::error("Failed to fetch market data for {$this->ticker}: " . $e->getMessage());
             

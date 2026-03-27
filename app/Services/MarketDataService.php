@@ -15,4 +15,9 @@ class MarketDataService
     {
         return $this->marketDataAdapter->fetchData($ticker);
     }
+
+    public function saveData(string $assetId, MarketDataDTOInterface $data): void
+    {
+        $this->marketDataAdapter->saveFetchedDataToDB($assetId, $data);
+    }
 }

@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Interfaces\MarketDataDTOInterface;
 use App\Interfaces\MarketDataAdapterInterface;
 use App\Models\Asset;
-use Illuminate\Support\Facades\Http;
 
 class AssetService
 {
@@ -14,7 +13,7 @@ class AssetService
         private MarketDataAdapterInterface $marketDataAdapter
     ) {}
 
-    public function getAssetID(string $ticker): string
+    public function getOrCreateAssetID(string $ticker): string
     {
         $asset = Asset::where('ticker', $ticker)->first();
         if (!$asset) {
@@ -29,14 +28,15 @@ class AssetService
         if ($this->marketDataAdapter->isTickerValid($ticker)) {
             $assetData = $this->marketDataService->getMarketData($ticker, $this->marketDataAdapter);
 
-            return Asset::create([
+            $asset = Asset::create([
                 'ticker' => $ticker,
                 'name' => $assetData->long_name,
                 'type' => $this->detectAssetType($assetData),
             ]);
-            // implement code to also add to market_data table at this point since it already does a request?
+            // since did a request already, save the 'updated' market data to db to avoid future requests
+            $this->marketDataService->saveData($asset->id, $assetData);
+            return $asset;
         }
-
         throw new \Exception("Ticker '{$ticker}' is not valid");
     }
 

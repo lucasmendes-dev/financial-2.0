@@ -207,16 +207,16 @@ class TransactionTest extends TestCase
     public function test_can_filter_transactions_by_price_range()
     {
         $asset = Asset::factory()->create();
-        Transaction::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset->id, 'price_per_asset' => 100]);
-        Transaction::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset->id, 'price_per_asset' => 200]);
-        Transaction::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset->id, 'price_per_asset' => 300]);
+        Transaction::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset->id, 'price_per_asset' => '100']);
+        Transaction::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset->id, 'price_per_asset' => '200']);
+        Transaction::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset->id, 'price_per_asset' => '300']);
 
         $response = $this->actingAs($this->user)
             ->getJson('/api/v1/transactions?price_gt=150&price_lt=250');
 
         $response->assertStatus(Response::HTTP_OK)
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.price_per_asset', 200);
+            ->assertJsonPath('data.0.price_per_asset', '200');
     }
 
     public function test_can_filter_transactions_by_executed_at_range()
@@ -254,7 +254,7 @@ class TransactionTest extends TestCase
             'user_id' => $this->user->id,
             'asset_id' => $asset->id,
             'quantity' => 10,
-            'avg_price' => 30.0,
+            'avg_price' => '30.00',
         ]);
     }
 
@@ -285,7 +285,7 @@ class TransactionTest extends TestCase
             'user_id' => $this->user->id,
             'asset_id' => $asset->id,
             'quantity' => 20,
-            'avg_price' => 30.25,
+            'avg_price' => '30.25',
         ]);
     }
 
@@ -315,7 +315,7 @@ class TransactionTest extends TestCase
             'user_id' => $this->user->id,
             'asset_id' => $asset->id,
             'quantity' => 6,
-            'avg_price' => 50.0,
+            'avg_price' => '50.00',
         ]);
     }
 
@@ -375,7 +375,7 @@ class TransactionTest extends TestCase
             'user_id' => $this->user->id,
             'asset_id' => $asset->id,
             'quantity' => 20,
-            'avg_price' => 30.25,
+            'avg_price' => '30.25',
         ]);
 
         // Fix: second buy was actually 10 @ 31.00
@@ -389,7 +389,7 @@ class TransactionTest extends TestCase
             'user_id' => $this->user->id,
             'asset_id' => $asset->id,
             'quantity' => 20,
-            'avg_price' => 30.50,
+            'avg_price' => '30.50',
         ]);
     }
 
@@ -428,7 +428,7 @@ class TransactionTest extends TestCase
             'user_id' => $this->user->id,
             'asset_id' => $asset->id,
             'quantity' => 5,
-            'avg_price' => 50.0,
+            'avg_price' => '50.00',
         ]);
     }
 
@@ -461,7 +461,7 @@ class TransactionTest extends TestCase
             'user_id' => $this->user->id,
             'asset_id' => $asset->id,
             'quantity' => 20,
-            'avg_price' => 40.0,
+            'avg_price' => '40.00',
         ]);
 
         // Delete second buy → recalculate from remaining
@@ -473,7 +473,7 @@ class TransactionTest extends TestCase
             'user_id' => $this->user->id,
             'asset_id' => $asset->id,
             'quantity' => 10,
-            'avg_price' => 30.0,
+            'avg_price' => '30.00',
         ]);
     }
 

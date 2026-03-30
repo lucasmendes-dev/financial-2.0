@@ -70,7 +70,7 @@ class PositionTest extends TestCase
                     'asset_id' => $asset->id,
                     'asset_ticker' => $asset->ticker,
                     'quantity' => (float) $position->quantity,
-                    'avg_price' => (float) $position->avg_price,
+                    'avg_price' => $position->avg_price->get(),
                 ]
             ]);
     }
@@ -152,9 +152,9 @@ class PositionTest extends TestCase
         $asset2 = Asset::factory()->create();
         $asset3 = Asset::factory()->create();
 
-        Position::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset1->id, 'avg_price' => 5]);
-        Position::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset2->id, 'avg_price' => 15]);
-        Position::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset3->id, 'avg_price' => 25]);
+        Position::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset1->id, 'avg_price' => '5']);
+        Position::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset2->id, 'avg_price' => '15']);
+        Position::factory()->create(['user_id' => $this->user->id, 'asset_id' => $asset3->id, 'avg_price' => '25']);
 
         // Filter avg_price > 10
         $response = $this->actingAs($this->user)
@@ -176,6 +176,6 @@ class PositionTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK)
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.avg_price', 15);
+            ->assertJsonPath('data.0.avg_price', '15');
     }
 }

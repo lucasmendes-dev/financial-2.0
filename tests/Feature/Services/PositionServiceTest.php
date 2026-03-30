@@ -41,7 +41,7 @@ class PositionServiceTest extends TestCase
             'user_id' => $user->id,
             'asset_id' => $asset->id,
             'quantity' => 10,
-            'avg_price' => 50.0,
+            'avg_price' => '50.00',
         ]);
     }
 
@@ -74,7 +74,7 @@ class PositionServiceTest extends TestCase
         $this->assertDatabaseHas('positions', [
             'id' => $position->id,
             'quantity' => 15,
-            'avg_price' => 60.0,
+            'avg_price' => '60.00',
         ]);
     }
 
@@ -103,7 +103,7 @@ class PositionServiceTest extends TestCase
         $this->assertDatabaseHas('positions', [
             'id' => $position->id,
             'quantity' => 6,
-            'avg_price' => 50.0,
+            'avg_price' => '50.00',
         ]);
     }
 
@@ -139,7 +139,7 @@ class PositionServiceTest extends TestCase
             'user_id' => $user->id,
             'asset_id' => $asset->id,
             'quantity' => 30,
-            'avg_price' => 20.0,
+            'avg_price' => '20.00',
         ]);
     }
 
@@ -201,7 +201,7 @@ class PositionServiceTest extends TestCase
             'user_id' => $user->id,
             'asset_id' => $asset->id,
             'quantity' => 20,
-            'avg_price' => 30.25,
+            'avg_price' => '30.25',
         ]);
     }
 
@@ -237,7 +237,7 @@ class PositionServiceTest extends TestCase
             'user_id' => $user->id,
             'asset_id' => $asset->id,
             'quantity' => 6,
-            'avg_price' => 50.0,
+            'avg_price' => '50.00',
         ]);
     }
 
@@ -308,7 +308,7 @@ class PositionServiceTest extends TestCase
             'user_id' => $user->id,
             'asset_id' => $asset->id,
             'quantity' => 10,
-            'avg_price' => 25.0,
+            'avg_price' => '25.00',
         ]);
     }
 

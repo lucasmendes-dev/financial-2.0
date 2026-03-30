@@ -37,7 +37,7 @@ class TransactionService
         $transaction->fill($data);
 
         if ($transaction->isDirty('quantity') || $transaction->isDirty('price_per_asset')) {
-            $transaction->total = $transaction->quantity * $transaction->price_per_asset;
+            $transaction->total = $transaction->price_per_asset->multiply($transaction->quantity);
         }
 
         $transaction->save();

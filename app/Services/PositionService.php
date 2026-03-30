@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Position;
 use App\Models\Transaction;
+use App\ValueObjects\Money;
 
 class PositionService
 {
@@ -28,22 +29,24 @@ class PositionService
                 'user_id' => $data['user_id'],
                 'asset_id' => $data['asset_id'],
                 'quantity' => $data['quantity'],
-                'avg_price' => $data['price_per_asset'],
+                'avg_price' => (new Money((string) $data['price_per_asset']))->get(),
             ]);
         }
     }
 
-    private function calculateNewAvgPrice(Position $position, array $data): float
+    private function calculateNewAvgPrice(Position $position, array $data): string
     {
         if ($data['type'] === 'sell') {
-            return (float) $position->avg_price;
+            return $position->avg_price->get();
         }
 
-        $currentTotal = $position->quantity * $position->avg_price;
-        $newTotal = $currentTotal + $data['total'];
+        $total = new Money($data['total']);
+
+        $currentTotal = $position->avg_price->multiply($position->quantity);
+        $newTotal = $currentTotal->add($total);
         $newQuantity = $position->quantity + $data['quantity'];
 
-        return $newQuantity > 0 ? $newTotal / $newQuantity : 0;
+        return $newQuantity > 0 ? $newTotal->divide($newQuantity)->get() : '0';
     }
 
     public function recalculatePosition(string $userId, string $assetId): void
@@ -54,13 +57,13 @@ class PositionService
             ->get();
 
         $quantity = 0;
-        $avgPrice = 0.0;
+        $avgPrice = new Money('0');
 
         foreach ($transactions as $tx) {
             if ($tx->type === 'buy') {
-                $totalCost = ($quantity * $avgPrice) + ($tx->quantity * $tx->price_per_asset);
+                $totalCost = $avgPrice->multiply($quantity)->add($tx->price_per_asset->multiply($tx->quantity));
                 $quantity += $tx->quantity;
-                $avgPrice = $quantity > 0 ? $totalCost / $quantity : 0;
+                $avgPrice = $quantity > 0 ? $totalCost->divide($quantity) : new Money('0');
             } else {
                 $quantity -= $tx->quantity;
                 // avg_price stays the same on sell
@@ -79,14 +82,14 @@ class PositionService
             if ($position) {
                 $position->update([
                     'quantity' => $quantity,
-                    'avg_price' => $avgPrice,
+                    'avg_price' => $avgPrice->get(),
                 ]);
             } else {
                 Position::create([
                     'user_id' => $userId,
                     'asset_id' => $assetId,
                     'quantity' => $quantity,
-                    'avg_price' => $avgPrice,
+                    'avg_price' => $avgPrice->get(),
                 ]);
             }
         }
@@ -105,14 +108,14 @@ class PositionService
         if ($transaction->type === 'buy') {
             $newQuantity = $position->quantity - $transaction->quantity;
             
-            $currentTotal = $position->quantity * $position->avg_price;
-            $txTotal = $transaction->quantity * $transaction->price_per_asset;
-            $newTotal = $currentTotal - $txTotal;
+            $currentTotal = $position->avg_price->multiply($position->quantity);
+            $txTotal = $transaction->price_per_asset->multiply($transaction->quantity);
+            $newTotal = $currentTotal->subtract($txTotal);
             
-            $newAvgPrice = $newQuantity > 0 ? $newTotal / $newQuantity : 0;
+            $newAvgPrice = $newQuantity > 0 ? $newTotal->divide($newQuantity)->get() : '0';
         } else {
             $newQuantity = $position->quantity + $transaction->quantity;
-            $newAvgPrice = $position->avg_price;
+            $newAvgPrice = $position->avg_price->get();
         }
 
         if ($newQuantity <= 0) {

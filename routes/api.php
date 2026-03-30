@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\AssetController;
 use App\Http\Controllers\Api\V1\PositionController;
 use App\Http\Controllers\Api\V1\TransactionController;
 use App\Http\Controllers\Api\V1\MarketDataController;
+use App\Http\Controllers\Api\V1\PortfolioController;
 
 Route::prefix('v1')->group(function () {
     // auth
@@ -40,5 +41,8 @@ Route::prefix('v1')->group(function () {
 
         // market data
         Route::post('/update-market-data', [MarketDataController::class, 'updateMarketData']);
+
+        // portfolio
+        Route::get('/portfolio', [PortfolioController::class, 'index']);
     });
 });

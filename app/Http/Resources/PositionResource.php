@@ -18,8 +18,8 @@ class PositionResource extends JsonResource
             'id' => $this->id,
             'asset_id' => $this->asset_id,
             'asset_ticker' => $this->asset->ticker,
-            'quantity' => (float) $this->quantity,
-            'avg_price' => (float) $this->avg_price,
+            'quantity' => $this->quantity,
+            'avg_price' => $this->avg_price->get(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

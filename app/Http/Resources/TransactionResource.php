@@ -19,9 +19,9 @@ class TransactionResource extends JsonResource
             'asset_id' => $this->asset_id,
             'asset_ticker' => $this->asset->ticker ?? null,
             'type' => $this->type,
-            'quantity' => (float) $this->quantity,
-            'price_per_asset' => (float) $this->price_per_asset,
-            'total' => (float) $this->total,
+            'quantity' => $this->quantity,
+            'price_per_asset' => $this->price_per_asset->get(),
+            'total' => $this->total->get(),
             'executed_at' => $this->executed_at,
         ];
     }

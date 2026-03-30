@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,6 +28,11 @@ class MarketData extends Model
      * @var string
      */
     protected $keyType = 'string';
+
+    protected $casts = [
+        'regular_market_price' => MoneyCast::class,
+        'regular_market_change' => MoneyCast::class,
+    ];
 
     public function assets(): HasMany
     {

@@ -5,7 +5,8 @@ namespace App\Providers;
 use App\Integrations\BrApiFreeAdapter;
 use App\Integrations\BrApiPaidAdapter;
 use App\Interfaces\MarketDataAdapterInterface;
-
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider; 
 
 class AppServiceProvider extends ServiceProvider
@@ -28,6 +29,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Illuminate\Support\Collection::macro('paginate', function ($perPage = 20, $page = null, $options = []) {
+            $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
+            return new LengthAwarePaginator(
+                $this->forPage($page, $perPage)->values(),
+                $this->count(),
+                $perPage,
+                $page,
+                $options ?: [
+                    'path' => Paginator::resolveCurrentPath(),
+                    'query' => request()->query(),
+                ]
+            );
+        });
     }
 }

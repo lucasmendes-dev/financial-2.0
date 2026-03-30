@@ -22,11 +22,16 @@ class PortfolioController extends Controller
         $filters = new PortfolioFilter($request);
         $portfolio = $filters->apply($portfolio);
 
+        $perPage = $request->input('per_page', 20);
+        $paginated = $portfolio->paginate($perPage);
+
         return response()->json([
-            'message' => 'Portfolio retrieved successfully',
-            'data' => PortfolioResource::collection($portfolio),
+            'data' => PortfolioResource::collection($paginated->appends($request->query())),
             'meta' => [
-                'total' => $portfolio->count(),
+                'total' => $paginated->total(),
+                'per_page' => $paginated->perPage(),
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
             ]
         ], Response::HTTP_OK);
     }

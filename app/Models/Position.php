@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,6 +28,10 @@ class Position extends Model
      * @var string
      */
     protected $keyType = 'string';
+
+    protected $casts = [
+        'avg_price' => MoneyCast::class,
+    ];
 
     public function asset(): BelongsTo
     {

@@ -12,6 +12,7 @@ class PortfolioResource extends JsonResource
     {
         return [
             'ticker' => $this->ticker,
+            'type' => $this->type,
             'quantity' => $this->quantity,
             'avg_price' => $this->avg_price,
             'current_price' => $this->current_price,
@@ -21,6 +22,7 @@ class PortfolioResource extends JsonResource
             'total_profit_loss_value' => $this->total_profit_loss_value,
             'daily_change_percent' => $this->daily_change_percent,
             'daily_change_value' => $this->daily_change_value,
+            'logo_url' => $this->logo_url,
         ];
     }
 }

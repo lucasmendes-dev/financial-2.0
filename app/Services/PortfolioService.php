@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\PortfolioDTO;
+use App\Http\Filters\V1\PortfolioFilter;
 use App\Models\MarketData;
 use App\Models\Position;
 use Illuminate\Support\Collection;
@@ -33,6 +34,7 @@ class PortfolioService
 
             return PortfolioDTO::fromArray([
                 'ticker' => $position->asset->ticker,
+                'type' => $position->asset->type,
                 'quantity' => $position->quantity,
                 'avg_price' => $avgPrice->get(),
                 'current_price' => $currentPrice->get(),
@@ -42,6 +44,7 @@ class PortfolioService
                 'total_profit_loss_value' => $profit->get(),
                 'daily_change_percent' => $marketData->regular_market_change_percent,
                 'daily_change_value' => $changeValue->multiply($position->quantity)->get(),
+                'logo_url' => $marketData->logo_url,
             ]);
         });
     }

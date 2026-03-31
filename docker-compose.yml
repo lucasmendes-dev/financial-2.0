@@ -66,6 +66,19 @@ services:
         networks:
             - financial_network
 
+    # worker to queue
+    worker:
+        build: .
+        command: php artisan queue:work redis --queue=market-data --sleep=3 --tries=3 --timeout=60
+        volumes:
+            - ./:/var/www
+        depends_on:
+            - redis
+            - db
+        restart: always
+        networks:
+            - financial_network
+
 networks:
     financial_network:
         driver: bridge

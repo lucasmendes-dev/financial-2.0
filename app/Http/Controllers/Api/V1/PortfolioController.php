@@ -16,7 +16,6 @@ class PortfolioController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        // aplicar cache aqui mais pra frente
         $portfolio = $this->portfolioService->getPortfolio($request->user()->id);
 
         $filters = new PortfolioFilter($request);

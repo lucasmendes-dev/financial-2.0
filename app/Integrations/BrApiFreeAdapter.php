@@ -49,7 +49,7 @@ class BrApiFreeAdapter implements MarketDataAdapterInterface
                 'regular_market_change' => $data->regular_market_change,
                 'regular_market_change_percent' => $data->regular_market_change_percent,
                 'logo_url' => $data->logourl,
-                'fetched_at' => Carbon::parse($data->requested_at)->toDateTimeString(),
+                'fetched_at' => Carbon::parse($data->requested_at)->timezone('America/Sao_Paulo')->toDateTimeString(),
             ]
         );
 

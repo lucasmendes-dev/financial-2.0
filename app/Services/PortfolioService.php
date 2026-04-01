@@ -3,19 +3,24 @@
 namespace App\Services;
 
 use App\DTO\PortfolioDTO;
-use App\Http\Filters\V1\PortfolioFilter;
 use App\Models\MarketData;
 use App\Models\Position;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class PortfolioService
 {
     public function getPortfolio(int $userId): Collection
     {
-        $positions = Position::where('user_id', $userId)->get();
-        $marketData = MarketData::whereIn('asset_id', $positions->pluck('asset_id'))->get();
+        $cacheKey = "portfolio:user:{$userId}";
 
-        return $this->calculatePortfolioValues($positions, $marketData);
+        $data = Cache::remember($cacheKey, now()->addMinutes(14), function () use ($userId) {
+            $positions = Position::where('user_id', $userId)->get();
+            $marketData = MarketData::whereIn('asset_id', $positions->pluck('asset_id'))->get();
+
+            return $this->calculatePortfolioValues($positions, $marketData)->toArray();
+        });
+        return collect($data)->map(fn ($item) => PortfolioDTO::fromArray($item));
     }
 
     private function calculatePortfolioValues($positions, $marketData): Collection
@@ -32,7 +37,7 @@ class PortfolioService
             $totalValue = $currentPrice->multiply($position->quantity);
             $profit = $totalValue->subtract($totalCost);
 
-            return PortfolioDTO::fromArray([
+            return [
                 'ticker' => $position->asset->ticker,
                 'type' => $position->asset->type,
                 'quantity' => $position->quantity,
@@ -45,7 +50,7 @@ class PortfolioService
                 'daily_change_percent' => $marketData->regular_market_change_percent,
                 'daily_change_value' => $changeValue->multiply($position->quantity)->get(),
                 'logo_url' => $marketData->logo_url,
-            ]);
+            ];
         });
     }
 }

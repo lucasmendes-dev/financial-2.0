@@ -67,12 +67,16 @@ class TransactionTest extends TestCase
 
         $response->assertStatus(Response::HTTP_CREATED)
             ->assertJson([
+                'message' => 'Transaction created successfully',
                 'data' => [
-                    'asset_id' => $asset->id,
+                    'id' => $response->json('data.id'),
+                    'asset_id' => (string) $asset->id,
+                    'asset_ticker' => $asset->ticker,
                     'type' => 'buy',
                     'quantity' => 10.5,
-                    'price_per_asset' => 150.75,
-                    'total' => 1582.875,
+                    'price_per_asset' => '150.75',
+                    'total' => '1582.87',
+                    'executed_at' => $response->json('data.executed_at'),
                 ]
             ]);
 
@@ -141,7 +145,7 @@ class TransactionTest extends TestCase
             ->assertJson([
                 'data' => [
                     'quantity' => 20,
-                    'total' => 2000.0,
+                    'total' => '2000.00',
                 ]
             ]);
 
@@ -216,7 +220,7 @@ class TransactionTest extends TestCase
 
         $response->assertStatus(Response::HTTP_OK)
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.price_per_asset', '200');
+            ->assertJsonPath('data.0.price_per_asset', '200.00');
     }
 
     public function test_can_filter_transactions_by_executed_at_range()

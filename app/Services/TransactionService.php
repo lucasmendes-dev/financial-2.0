@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Transaction;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class TransactionService
 {
@@ -12,17 +12,20 @@ class TransactionService
         private PositionService $positionService,
     ) {}
 
-    public function handleTransactionCreation(array $data): array
+    public function handleTransactionCreation(array $data, int|string $userId): Transaction
     {
-        $data = $this->getTransactionData($data);
-        $this->positionService->updatePosition($data);
-        // send notification -> future
-        return $data;
+        return DB::transaction(function () use ($data, $userId) {
+            $data = $this->getTransactionData($data, $userId);
+            $transaction = Transaction::create($data);
+            $this->positionService->updatePosition($data);
+            // send notification -> future
+            return $transaction;
+        });
     }
 
-    private function getTransactionData(array $data): array
+    private function getTransactionData(array $data, int|string $userId): array
     {
-        $data['user_id'] = Auth::user()->id;
+        $data['user_id'] = $userId;
         $data['asset_id'] = $this->assetService->getOrCreateAssetID($data['ticker']);
         $data['total'] = $data['quantity'] * $data['price_per_asset'];
         $data['executed_at'] = date('Y-m-d H:i:s', strtotime(now()));
@@ -34,26 +37,30 @@ class TransactionService
 
     public function handleTransactionUpdate(Transaction $transaction, array $data): Transaction
     {
-        $transaction->fill($data);
+        return DB::transaction(function () use ($transaction, $data) {
+            $transaction->fill($data);
 
-        if ($transaction->isDirty('quantity') || $transaction->isDirty('price_per_asset')) {
-            $transaction->total = $transaction->price_per_asset->multiply($transaction->quantity);
-        }
+            if ($transaction->isDirty('quantity') || $transaction->isDirty('price_per_asset')) {
+                $transaction->total = $transaction->price_per_asset->multiply($transaction->quantity);
+            }
 
-        $transaction->save();
+            $transaction->save();
 
-        $this->positionService->recalculatePosition($transaction->user_id, $transaction->asset_id);
+            $this->positionService->recalculatePosition($transaction->user_id, $transaction->asset_id);
 
-        return $transaction;
+            return $transaction;
+        });
     }
 
     public function handleTransactionDeletion(Transaction $transaction): void
     {
-        $userId = $transaction->user_id;
-        $assetId = $transaction->asset_id;
+        DB::transaction(function () use ($transaction) {
+            $userId = $transaction->user_id;
+            $assetId = $transaction->asset_id;
 
-        $transaction->delete();
+            $transaction->delete();
 
-        $this->positionService->recalculatePosition($userId, $assetId);
+            $this->positionService->recalculatePosition($userId, $assetId);
+        });
     }
 }

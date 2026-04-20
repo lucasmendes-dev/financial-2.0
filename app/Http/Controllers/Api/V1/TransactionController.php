@@ -45,8 +45,7 @@ class TransactionController extends Controller
     {
         $this->authorize('create', Transaction::class);
 
-        $data = $this->transactionService->handleTransactionCreation($request->validated());
-        $transaction = Transaction::create($data);
+        $transaction = $this->transactionService->handleTransactionCreation($request->validated(), $request->user()->id);
 
         return response()->json([
             'message' => 'Transaction created successfully',

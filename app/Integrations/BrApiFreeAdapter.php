@@ -4,10 +4,6 @@ namespace App\Integrations;
 
 use App\DTO\BrApiFreeDTO;
 use App\Interfaces\MarketDataAdapterInterface;
-use App\Interfaces\MarketDataDTOInterface;
-use App\Models\MarketData;
-use App\Models\MarketDataLog;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 
 class BrApiFreeAdapter implements MarketDataAdapterInterface
@@ -38,24 +34,5 @@ class BrApiFreeAdapter implements MarketDataAdapterInterface
         $response = Http::get($this->availableTickersUrl)->json();
 
         return in_array($ticker, $response['stocks']);
-    }
-
-    public function saveFetchedDataToDB(string $assetId, MarketDataDTOInterface $data): void
-    {
-        MarketData::updateOrCreate(
-            ['asset_id' => $assetId],
-            [
-                'regular_market_price' => $data->regular_market_price,
-                'regular_market_change' => $data->regular_market_change,
-                'regular_market_change_percent' => $data->regular_market_change_percent,
-                'logo_url' => $data->logourl,
-                'fetched_at' => Carbon::parse($data->requested_at)->timezone('America/Sao_Paulo')->toDateTimeString(),
-            ]
-        );
-
-        MarketDataLog::create([
-            'type' => 'success',
-            'message' => implode(' | ', $data->toArray())
-        ]);
     }
 }

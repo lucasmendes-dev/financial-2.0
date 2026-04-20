@@ -17,9 +17,4 @@ class BrApiPaidAdapter implements MarketDataAdapterInterface
     {
         throw new \Exception('Not implemented');
     }
-
-    public function saveFetchedDataToDB(string $assetId, MarketDataDTOInterface $data): void
-    {
-        throw new \Exception('Not implemented');
-    }
 }

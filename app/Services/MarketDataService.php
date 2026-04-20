@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Interfaces\MarketDataDTOInterface;
 use App\Interfaces\MarketDataAdapterInterface;
+use App\Models\MarketData;
+use App\Models\MarketDataLog;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Auth;
 
 class MarketDataService
 {
@@ -20,9 +22,22 @@ class MarketDataService
 
     public function saveData(string $assetId, MarketDataDTOInterface $data): void
     {
-        $userId = Auth::user()->id;
-        Cache::forget("portfolio:user:{$userId}");
+        MarketData::updateOrCreate(
+            ['asset_id' => $assetId],
+            [
+                'regular_market_price' => $data->regular_market_price,
+                'regular_market_change' => $data->regular_market_change,
+                'regular_market_change_percent' => $data->regular_market_change_percent,
+                'logo_url' => $data->logourl,
+                'fetched_at' => Carbon::parse($data->requested_at)->timezone('America/Sao_Paulo')->toDateTimeString(),
+            ]
+        );
 
-        $this->marketDataAdapter->saveFetchedDataToDB($assetId, $data);
+        MarketDataLog::create([
+            'type' => 'success',
+            'message' => implode(' | ', $data->toArray())
+        ]);
+
+        Cache::tags(['portfolios'])->flush();
     }
 }

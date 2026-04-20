@@ -14,7 +14,7 @@ class PortfolioService
     {
         $cacheKey = "portfolio:user:{$userId}";
 
-        $data = Cache::remember($cacheKey, now()->addMinutes(14), function () use ($userId) {
+        $data = Cache::tags(['portfolios'])->remember($cacheKey, now()->addMinutes(14), function () use ($userId) {
             $positions = Position::where('user_id', $userId)->get();
             $marketData = MarketData::whereIn('asset_id', $positions->pluck('asset_id'))->get();
 
@@ -25,8 +25,14 @@ class PortfolioService
 
     private function calculatePortfolioValues($positions, $marketData): Collection
     {
-        return $positions->map(function ($position) use ($marketData) {
-            $marketData = $marketData->firstWhere('asset_id', $position->asset_id);
+        $marketDataByAssetId = $marketData->keyBy('asset_id');
+
+        return $positions->map(function ($position) use ($marketDataByAssetId) {
+            $marketData = $marketDataByAssetId->get($position->asset_id);
+
+            if (!$marketData) {
+                return null;
+            }
 
             // coming from $casts (MoneyCast::class)
             $avgPrice = $position->avg_price;
@@ -51,6 +57,6 @@ class PortfolioService
                 'daily_change_value' => $changeValue->multiply($position->quantity)->get(),
                 'logo_url' => $marketData->logo_url,
             ];
-        });
+        })->filter();
     }
 }

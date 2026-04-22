@@ -352,47 +352,6 @@ Tests run automatically on GitHub Actions for every push to `main`/`develop` and
 
 ---
 
-## 📁 Project Structure
-
-```
-financial-2.0/
-├── app/
-│   ├── Casts/               # Custom Eloquent casts (MoneyCast)
-│   ├── Console/              # Artisan commands
-│   ├── DTO/                  # Data Transfer Objects (BrApiFreeDTO, PortfolioDTO)
-│   ├── Http/
-│   │   ├── Controllers/Api/V1/  # Versioned API controllers
-│   │   ├── Filters/V1/          # Collection-based query filters
-│   │   ├── Requests/            # Form request validation
-│   │   └── Resources/           # API resource transformers
-│   ├── Integrations/         # External API adapters (BrAPI)
-│   ├── Interfaces/           # Contracts (MarketDataAdapter, MarketDataDTO)
-│   ├── Jobs/                 # Queue jobs (market data fetching)
-│   ├── Models/               # Eloquent models (User, Asset, Transaction, Position, MarketData)
-│   ├── Policies/             # Authorization policies
-│   ├── Providers/            # Service providers & bindings
-│   ├── Services/             # Business logic layer
-│   └── ValueObjects/         # Immutable value objects (Money)
-├── database/
-│   ├── factories/            # Model factories for testing
-│   ├── migrations/           # Database schema migrations
-│   └── seeders/              # Database seeders
-├── docker/                   # Docker config files (Nginx, PHP)
-├── routes/
-│   ├── api.php               # API route definitions
-│   ├── console.php           # Scheduled tasks
-│   └── web.php               # Web routes
-├── tests/
-│   ├── Feature/              # Integration/feature tests
-│   └── Unit/                 # Unit tests
-├── .github/workflows/        # GitHub Actions CI
-├── docker-compose.yml        # Docker services orchestration
-├── Dockerfile                # PHP-FPM application image
-└── composer.json             # PHP dependencies & scripts
-```
-
----
-
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -409,6 +368,3 @@ This project is open-source and available under the [MIT License](LICENSE).
 
 ---
 
-<p align="center">
-  Built with ❤️ by <a href="https://github.com/lucasmendes-dev">Lucas Mendes</a>
-</p>

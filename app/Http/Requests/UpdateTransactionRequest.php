@@ -12,7 +12,7 @@ class UpdateTransactionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,12 @@ class UpdateTransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'asset_id' => ['sometimes', 'string', 'exists:assets,id'],
+            'type' => ['sometimes', 'string', 'in:buy,sell'],
+            'quantity' => ['sometimes', 'numeric', 'min:0.01'],
+            'price_per_asset' => ['sometimes', 'numeric', 'min:0.01'],
+            'total' => ['sometimes', 'numeric', 'min:0.01'],
+            'executed_at' => ['sometimes', 'date'],
         ];
     }
 }

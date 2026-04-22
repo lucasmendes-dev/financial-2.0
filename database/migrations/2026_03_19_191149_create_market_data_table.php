@@ -15,13 +15,18 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('asset_id')->constrained()->cascadeOnDelete();
 
-            $table->decimal('price', 15, 6);
-            $table->timestamp('fetched_at');
+            $table->decimal('regular_market_price', 15, 2);
+            $table->decimal('regular_market_change', 15, 2);
+            $table->decimal('regular_market_change_percent', 15, 2);
+            $table->string('logo_url');
 
+            $table->timestamp('fetched_at');
             $table->timestamps();
 
             $table->index('fetched_at');
             $table->index(['asset_id', 'fetched_at']);
+
+            $table->unique('asset_id');
         });
     }
 

@@ -13,7 +13,7 @@ class AssetPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,7 +21,7 @@ class AssetPolicy
      */
     public function view(User $user, Asset $asset): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -44,22 +44,6 @@ class AssetPolicy
      * Determine whether the user can delete the model.
      */
     public function delete(User $user, Asset $asset): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Asset $asset): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Asset $asset): bool
     {
         return false;
     }

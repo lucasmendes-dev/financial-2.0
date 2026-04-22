@@ -19,7 +19,7 @@ class PositionSeeder extends Seeder
 
         // Collect unique pairs to satisfy the composite unique index
         $positions = [];
-        while (count($positions) < 3500) {
+        while (count($positions) < 1500) {
             $u = $userIds[array_rand($userIds)];
             $a = $assetIds[array_rand($assetIds)];
             

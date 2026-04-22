@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('logs', function (Blueprint $table) {
+        Schema::create('market_data_logs', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('type');
-            $table->text('message');
+            $table->longText('message');
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('logs');
+        Schema::dropIfExists('market_data_logs');
     }
 };

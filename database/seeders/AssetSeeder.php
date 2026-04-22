@@ -12,6 +12,6 @@ class AssetSeeder extends Seeder
      */
     public function run(): void
     {
-        Asset::factory(500)->create();
+        Asset::factory(100)->create();
     }
 }

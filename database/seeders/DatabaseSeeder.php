@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(1000)->create();
+        User::factory(500)->create();
 
         $this->call([
             AssetSeeder::class,

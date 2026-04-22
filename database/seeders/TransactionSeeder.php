@@ -17,10 +17,10 @@ class TransactionSeeder extends Seeder
         $users = User::all();
         $assets = Asset::all();
 
-        // Ensure we create 5000 transactions randomly attached to existing users and assets
-        // We use loops to avoid memory exhaustion with 5000 big objects at once
+        // Ensure we create 2500 transactions randomly attached to existing users and assets
+        // We use loops to avoid memory exhaustion with 2500 big objects at once
         foreach (range(1, 10) as $i) {
-            Transaction::factory(500)
+            Transaction::factory(250)
                 ->recycle($users)
                 ->recycle($assets)
                 ->create();

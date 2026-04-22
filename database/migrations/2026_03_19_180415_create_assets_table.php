@@ -18,6 +18,7 @@ return new class extends Migration
             $table->enum('type', ['stock', 'fii']);
             $table->timestamps();
 
+            $table->index('ticker');
             $table->index('type');
         });
     }

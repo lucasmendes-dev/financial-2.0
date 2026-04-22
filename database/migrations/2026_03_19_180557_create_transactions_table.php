@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('type', ['buy', 'sell']);
 
             $table->integer('quantity')->nullable();
-            $table->decimal('price_per_asset', 15, 6)->nullable();
+            $table->decimal('price_per_asset', 15, 2)->nullable();
             $table->decimal('total', 15, 2);
 
             $table->timestamp('executed_at');

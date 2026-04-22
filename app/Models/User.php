@@ -30,4 +30,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function positions()
+    {
+        return $this->hasMany(Position::class);
+    }
 }

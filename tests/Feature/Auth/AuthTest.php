@@ -1,9 +1,10 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -19,7 +20,7 @@ class AuthTest extends TestCase
             'password_confirmation' => 'P@ssword123',
         ]);
 
-        $response->assertStatus(201)
+        $response->assertStatus(Response::HTTP_CREATED)
             ->assertJsonStructure([
                 'message',
                 'data' => [
@@ -45,7 +46,7 @@ class AuthTest extends TestCase
             'password' => 'P@ssword123',
         ]);
 
-        $response->assertStatus(200)
+        $response->assertStatus(Response::HTTP_OK)
                  ->assertJsonStructure([
                      'message',
                      'data' => [
@@ -65,7 +66,7 @@ class AuthTest extends TestCase
             'Authorization' => 'Bearer ' . $token,
         ])->postJson('/api/v1/auth/logout');
 
-        $response->assertStatus(200)
+        $response->assertStatus(Response::HTTP_OK)
                  ->assertJson(['message' => 'Logged out successfully']);
 
         $this->assertCount(0, $user->tokens);
@@ -80,7 +81,7 @@ class AuthTest extends TestCase
             'Authorization' => 'Bearer ' . $token,
         ])->postJson('/api/v1/auth/refresh');
 
-        $response->assertStatus(200)
+        $response->assertStatus(Response::HTTP_OK)
                  ->assertJsonStructure([
                      'message',
                      'data' => [
@@ -102,7 +103,7 @@ class AuthTest extends TestCase
             'Authorization' => 'Bearer ' . $token,
         ])->getJson('/api/v1/auth/me');
 
-        $response->assertStatus(200)
+        $response->assertStatus(Response::HTTP_OK)
                  ->assertJson([
                      'message' => 'You are already logged in',
                      'data' => [

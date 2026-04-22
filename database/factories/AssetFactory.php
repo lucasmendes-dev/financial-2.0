@@ -11,16 +11,17 @@ use Illuminate\Support\Str;
  */
 class AssetFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected static array $tickers = [];
+
     public function definition(): array
     {
+        if (empty(self::$tickers)) {
+            self::$tickers = require database_path('data/assets_ticker.php');
+        }
+
         return [
             'id' => Str::uuid(),
-            'ticker' => $this->faker->regexify('[A-Z]{4}[1-4]{2}'),
+            'ticker' => $this->faker->unique()->randomElement(self::$tickers),
             'name' => $this->faker->company(),
             'type' => $this->faker->randomElement(['stock', 'fii']),
         ];

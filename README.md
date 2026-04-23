@@ -285,7 +285,7 @@ GET /api/v1/portfolio?ticker=PETR4&total_value_gt=1000&order_by=-total_profit_lo
 Market data is fetched automatically via a scheduled job pipeline:
 
 ```
-Schedule (weekdays, 10:15–17:15 BRT, every 15 min)
+Schedule (weekdays, 10:30–17:30 BRT, every 30 min)
   └── FetchMarketDataJob (dispatches one job per asset)
         └── FetchSingleMarketDataJob (per ticker)
               └── MarketDataService
@@ -349,16 +349,6 @@ Tests run automatically on GitHub Actions for every push to `main`/`develop` and
 | `BRAPI_URL` | brAPI base URL | `https://brapi.dev/api/quote/` |
 | `BRAPI_TOKEN` | brAPI authentication token | — |
 | `BRAPI_PROVIDER` | Market data provider (`free` / `paid`) | `free` |
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ---
 

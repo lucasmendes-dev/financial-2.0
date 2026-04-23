@@ -21,7 +21,7 @@ class MarketDataScheduleTest extends TestCase
         });
 
         $this->assertNotNull($event, 'The command market-data:fetch is not scheduled.');
-        $this->assertEquals('*/15 * * * 1-5', $event->expression);
+        $this->assertEquals('*/30 * * * 1-5', $event->expression);
         $this->assertEquals('America/Sao_Paulo', $event->timezone);
         $this->assertTrue($event->withoutOverlapping);
     }

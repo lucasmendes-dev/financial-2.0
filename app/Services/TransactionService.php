@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Transaction;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class TransactionService
@@ -18,7 +19,9 @@ class TransactionService
             $data = $this->getTransactionData($data, $userId);
             $transaction = Transaction::create($data);
             $this->positionService->updatePosition($data);
-            // send notification -> future
+
+            $this->clearPortfolioCache($userId);
+
             return $transaction;
         });
     }
@@ -48,6 +51,8 @@ class TransactionService
 
             $this->positionService->recalculatePosition($transaction->user_id, $transaction->asset_id);
 
+            $this->clearPortfolioCache($transaction->user_id);
+
             return $transaction;
         });
     }
@@ -61,6 +66,13 @@ class TransactionService
             $transaction->delete();
 
             $this->positionService->recalculatePosition($userId, $assetId);
+
+            $this->clearPortfolioCache($userId);
         });
+    }
+
+    private function clearPortfolioCache(int|string $userId): void
+    {
+        Cache::tags(['portfolios'])->forget("portfolio:user:{$userId}");
     }
 }

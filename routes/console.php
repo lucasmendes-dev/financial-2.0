@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('market-data:fetch')
     ->weekdays()
-    ->everyThirtyMinutes()
-    ->between('10:30', '17:30')
+    ->everyTwoHours()
+    ->between('10:00', '18:05')
     ->timezone('America/Sao_Paulo')
     ->withoutOverlapping()
     ->onFailure(function () {

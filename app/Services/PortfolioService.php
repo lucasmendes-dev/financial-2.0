@@ -14,8 +14,8 @@ class PortfolioService
     {
         $cacheKey = "portfolio:user:{$userId}";
 
-        $data = Cache::tags(['portfolios'])->remember($cacheKey, now()->addMinutes(14), function () use ($userId) {
-            $positions = Position::where('user_id', $userId)->get();
+        $data = Cache::tags(['portfolios'])->remember($cacheKey, now()->addMinutes(100), function () use ($userId) {
+            $positions = Position::with('asset')->where('user_id', $userId)->get();
             $marketData = MarketData::whereIn('asset_id', $positions->pluck('asset_id'))->get();
 
             return $this->calculatePortfolioValues($positions, $marketData)->toArray();
